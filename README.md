@@ -10,8 +10,12 @@ The application is config based. There will be multiple configs.
 
 ### Global Config
 
+`ltime.config.json`
+
 The global config should hold information just as the Discord App Token and maybe other configurations.
 
 ### Individual Config
+
+`_name_.ltime.json`
 
 Each config item will be run after the other, so you can make configuration for multiple people. These config will hold information such as Untis Credentials, Discord User ID's and Locations of the school and starting point.
