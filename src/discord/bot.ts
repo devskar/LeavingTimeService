@@ -9,7 +9,7 @@ import {
 import config from '../../ltime.config.json';
 
 class Bot {
-	client: Client;
+	private client: Client;
 
 	constructor() {
 		this.client = new Client({ intents: Intents.FLAGS.DIRECT_MESSAGES });
@@ -37,6 +37,10 @@ class Bot {
 	login(): void {
 		console.log('Logging in...');
 		this.client.login(config.discord.appToken);
+	}
+
+	destroy(): void {
+		this.client.destroy();
 	}
 
 	log(message: string): void {
