@@ -1,7 +1,7 @@
 import Bot from './bot';
 import BVGClient from './bvg';
 import { loadConfigurations } from './configurations';
-import { formatJourneys } from './helper';
+import { formatJourneys, formatTime } from './helper';
 import { loadTimetableData } from './untis';
 
 const main = () => {
@@ -38,12 +38,19 @@ const main = () => {
 				);
 
 				bvgClient.getJourney(start, end, leavingTime).then(journey => {
-					if (!journey.journeys) return;
-
-					bot.sendMessageToUserById(
-						config.discord.user_id,
-						`Trips:\n${formatJourneys(journey.journeys)}`,
-					);
+					if (!journey.journeys) {
+						bot.sendMessageToUserById(
+							config.discord.user_id,
+							`No journey found for ${config.trip.start_location} to ${
+								config.trip.end_location
+							} at ${formatTime(leavingTime)}`,
+						);
+					} else {
+						bot.sendMessageToUserById(
+							config.discord.user_id,
+							`Trips:\n${formatJourneys(journey.journeys)}`,
+						);
+					}
 				});
 			} catch (err) {
 				console.log(err);

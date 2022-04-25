@@ -52,29 +52,22 @@ class Bot {
 	}
 
 	async getLogChannel(): Promise<TextChannel> {
-		return this.client.channels
-			.fetch(config.discord.logChannelId)
-			.then(channel => channel as TextChannel);
+		return (await this.client.channels.fetch(
+			config.discord.logChannelId,
+		)) as TextChannel;
 	}
 
 	async getUserById(id: string): Promise<User> {
-		return this.client.users.fetch(id).catch(err => {
-			throw err;
-		});
+		return await this.client.users.fetch(id);
 	}
 
-	sendMessageToUser(user: User, message: string): void {
-		user.send(message);
+	async sendMessageToUser(user: User, message: string): Promise<void> {
+		await user.send(message);
 	}
 
 	async sendMessageToUserById(userId: string, message: string): Promise<void> {
-		this.getUserById(userId)
-			.then(user => {
-				this.sendMessageToUser(user, message);
-			})
-			.catch(err => {
-				throw err;
-			});
+		const user = await this.getUserById(userId);
+		this.sendMessageToUser(user, message);
 	}
 }
 
