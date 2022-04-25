@@ -7,6 +7,11 @@ type Configuration = {
 	discord: {
 		user_id: string;
 	};
+	trip: {
+		time_buffer_min: number;
+		start_location: string;
+		end_location: string;
+	};
 };
 export const CONFIG_FILE_FOLDER = './configs/';
 export const CONFIG_FILE_SUFFIX = '.ltime.json';

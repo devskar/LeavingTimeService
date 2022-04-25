@@ -40,23 +40,42 @@ const loadTimetableDataAuthenticated = async (
 		config.base_url,
 	);
 
-	// TODO: Remove
-	const date = new Date();
-	date.setMonth(2, 23);
-
 	return untis
 		.login()
-		.then(() => untis.getOwnClassTimetableFor(date))
+		.then(() => untis.getOwnClassTimetableForToday())
 		.then(lessons => {
 			const { filteredLessons, cancelledLessons } =
 				filterAndSortLessons(lessons);
-			const leavingTime = Webuntis.convertUntisDate(
-				filteredLessons[0].startTime,
-				date,
-			);
-
+			// TODO: Date is invalid
+			const leavingTime = untisTimeToDate(filteredLessons[0].startTime);
 			return { cancelledLessons, leavingTime };
 		});
+};
+
+//#region Helper
+
+// e.g. 800 => Date(8am)
+const untisTimeToDate = (
+	untisTime: number,
+	baseDate: Date = new Date(),
+): Date => {
+	const date = new Date(baseDate.getTime());
+
+	const untisTimeString = String(untisTime);
+
+	const tmpstr = untisTimeString.slice(-2); // 👉️ '00'
+	const minutes = Number(tmpstr); // 👉️ 00
+
+	const length = untisTimeString.length;
+	// TODO: Cleaner way to handle this
+	const tmpstr2 = untisTimeString.slice(0, length === 4 ? 2 : 1);
+	const hours = Number(tmpstr2); // 👉️ '08'
+
+	date.setHours(hours);
+	date.setMinutes(minutes);
+	date.setSeconds(0);
+
+	return date;
 };
 
 const filterAndSortLessons = (
@@ -75,3 +94,5 @@ const filterAndSortLessons = (
 
 	return { filteredLessons, cancelledLessons };
 };
+
+//#endregion

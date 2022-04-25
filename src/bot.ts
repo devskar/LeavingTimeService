@@ -6,7 +6,7 @@ import {
 	TextChannel,
 	User,
 } from 'discord.js';
-import config from '../../ltime.config.json';
+import config from '../ltime.config.json';
 
 class Bot {
 	private client: Client;
@@ -58,7 +58,9 @@ class Bot {
 	}
 
 	async getUserById(id: string): Promise<User> {
-		return this.client.users.fetch(id);
+		return this.client.users.fetch(id).catch(err => {
+			throw err;
+		});
 	}
 
 	sendMessageToUser(user: User, message: string): void {
@@ -66,7 +68,13 @@ class Bot {
 	}
 
 	async sendMessageToUserById(userId: string, message: string): Promise<void> {
-		this.sendMessageToUser(await this.getUserById(userId), message);
+		this.getUserById(userId)
+			.then(user => {
+				this.sendMessageToUser(user, message);
+			})
+			.catch(err => {
+				throw err;
+			});
 	}
 }
 
