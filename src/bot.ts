@@ -3,13 +3,15 @@ import {
 	Client,
 	ClientEvents,
 	Intents,
-	TextChannel,
+	Message,
 	User,
 } from 'discord.js';
 import config from '../ltime.config.json';
 
 class Bot {
 	private client: Client;
+	private clientMessageQueue: { id: string; message: string }[] = [];
+	private serverMessageQueue: { id: string; message: string }[] = [];
 
 	constructor() {
 		this.client = new Client({ intents: Intents.FLAGS.DIRECT_MESSAGES });
@@ -39,35 +41,57 @@ class Bot {
 		this.client.login(config.discord.appToken);
 	}
 
-	destroy(): void {
+	async destroy(): Promise<void> {
 		this.client.destroy();
 	}
 
-	log(message: string): void {
-		this.getLogChannel().then(channel => {
-			if (channel) {
-				channel.send(message);
-			}
-		});
-	}
-
-	async getLogChannel(): Promise<TextChannel> {
-		return (await this.client.channels.fetch(
-			config.discord.logChannelId,
-		)) as TextChannel;
+	async log(message: string): Promise<void> {
+		this.addServerMessageToQueue(config.discord.logChannelId, message);
+		console.log(message);
 	}
 
 	async getUserById(id: string): Promise<User> {
-		return await this.client.users.fetch(id);
+		return this.client.users.fetch(id);
 	}
 
-	async sendMessageToUser(user: User, message: string): Promise<void> {
-		await user.send(message);
+	async sendMessageToUser(
+		user: User,
+		message: string,
+	): Promise<Message<boolean>> {
+		console.log('Sending message to ' + user.username);
+		return user.send(message);
 	}
 
-	async sendMessageToUserById(userId: string, message: string): Promise<void> {
+	async sendMessageToUserById(
+		userId: string,
+		message: string,
+	): Promise<Message<boolean>> {
 		const user = await this.getUserById(userId);
-		this.sendMessageToUser(user, message);
+		return this.sendMessageToUser(user, message);
+	}
+
+	addClientMessageToQueue(id: string, message: string): void {
+		this.clientMessageQueue.push({ id, message });
+	}
+
+	async sendQueuedClientMessages(): Promise<void> {
+		Promise.all(
+			this.clientMessageQueue.map(message =>
+				this.sendMessageToUserById(message.id, message.message),
+			),
+		);
+	}
+
+	addServerMessageToQueue(id: string, message: string): void {
+		this.serverMessageQueue.push({ id, message });
+	}
+
+	async sendQueuedServerMessages(): Promise<void> {
+		Promise.all(
+			this.serverMessageQueue.map(message =>
+				this.sendMessageToUserById(message.id, message.message),
+			),
+		);
 	}
 }
 
