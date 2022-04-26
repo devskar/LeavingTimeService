@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.eslintrc.json
+.git
+.prettierrc.json
+yarn.lock
+nodemon.json
+.gitignore
+README.md
