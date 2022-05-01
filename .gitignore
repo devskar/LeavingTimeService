@@ -17,4 +17,5 @@ node_modules
 # env
 .env
 
-ltime.config.json
+./ltime.config.json
+./configs/*

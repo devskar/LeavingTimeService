@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { UntisConfiguration } from './untis';
 
-type Configuration = {
+export type Configuration = {
 	name: string;
 	untis: UntisConfiguration;
 	discord: {

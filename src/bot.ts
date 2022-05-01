@@ -4,14 +4,13 @@ import {
 	ClientEvents,
 	Intents,
 	Message,
+	TextChannel,
 	User,
 } from 'discord.js';
 import config from '../ltime.config.json';
 
 class Bot {
 	private client: Client;
-	private clientMessageQueue: { id: string; message: string }[] = [];
-	private serverMessageQueue: { id: string; message: string }[] = [];
 
 	constructor() {
 		this.client = new Client({ intents: Intents.FLAGS.DIRECT_MESSAGES });
@@ -27,7 +26,6 @@ class Bot {
 
 	registerDefaultEvents() {
 		this.client.on('ready', event => {
-			console.log('Ready!');
 			this.log('LeavingTimerService started. Running Configurations now!');
 
 			event.user.setActivity(config.discord.botStatus, {
@@ -37,7 +35,7 @@ class Bot {
 	}
 
 	login(): void {
-		console.log('Logging in...');
+		this.log('Logging in...');
 		this.client.login(config.discord.appToken);
 	}
 
@@ -45,20 +43,29 @@ class Bot {
 		this.client.destroy();
 	}
 
-	async log(message: string): Promise<void> {
-		this.addServerMessageToQueue(config.discord.logChannelId, message);
-		console.log(message);
+	async log(message: string): Promise<Message<boolean> | void> {
+		console.log('[LOG] ' + message);
+		if (this.client.isReady())
+			return this.sendMessageToChannelById(
+				config.discord.logChannelId,
+				message,
+			);
 	}
 
 	async getUserById(id: string): Promise<User> {
 		return this.client.users.fetch(id);
 	}
 
+	async getChannelById(id: string): Promise<TextChannel> {
+		return (await this.client.channels.fetch(id)) as TextChannel;
+	}
+
 	async sendMessageToUser(
 		user: User,
 		message: string,
 	): Promise<Message<boolean>> {
-		console.log('Sending message to ' + user.username);
+		// DEBUG
+		this.log('Sending message to ' + user.username);
 		return user.send(message);
 	}
 
@@ -70,28 +77,19 @@ class Bot {
 		return this.sendMessageToUser(user, message);
 	}
 
-	addClientMessageToQueue(id: string, message: string): void {
-		this.clientMessageQueue.push({ id, message });
+	async sendMessageToChannelById(
+		channelId: string,
+		message: string,
+	): Promise<Message<boolean>> {
+		const channel = await this.getChannelById(channelId);
+		return this.sendMessageToChannel(channel, message);
 	}
 
-	async sendQueuedClientMessages(): Promise<void> {
-		Promise.all(
-			this.clientMessageQueue.map(message =>
-				this.sendMessageToUserById(message.id, message.message),
-			),
-		);
-	}
-
-	addServerMessageToQueue(id: string, message: string): void {
-		this.serverMessageQueue.push({ id, message });
-	}
-
-	async sendQueuedServerMessages(): Promise<void> {
-		Promise.all(
-			this.serverMessageQueue.map(message =>
-				this.sendMessageToUserById(message.id, message.message),
-			),
-		);
+	async sendMessageToChannel(
+		channel: TextChannel,
+		message: string,
+	): Promise<Message<boolean>> {
+		return channel.send(message);
 	}
 }
 

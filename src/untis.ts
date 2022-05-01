@@ -9,7 +9,7 @@ export type UntisConfiguration = {
 
 export type TimetableLoadingResult = {
 	cancelledLessons: Lesson[];
-	leavingTime: Date;
+	schoolStart?: Date;
 };
 
 export const loadTimetableData = (
@@ -40,15 +40,21 @@ const loadTimetableDataAuthenticated = async (
 		config.base_url,
 	);
 
+	const date = new Date();
+	date.setMonth(3, 28);
+
 	return untis
 		.login()
-		.then(() => untis.getOwnClassTimetableForToday())
+		.then(() => untis.getOwnClassTimetableFor(date))
 		.then(lessons => {
 			const { filteredLessons, cancelledLessons } =
 				filterAndSortLessons(lessons);
-			// TODO: Date is invalid
-			const leavingTime = untisTimeToDate(filteredLessons[0].startTime);
-			return { cancelledLessons, leavingTime };
+
+			if (filteredLessons.length === 0) {
+				return { cancelledLessons };
+			}
+			const schoolStart = untisTimeToDate(filteredLessons[0].startTime);
+			return { cancelledLessons, schoolStart };
 		});
 };
 
