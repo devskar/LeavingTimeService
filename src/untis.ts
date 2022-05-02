@@ -40,12 +40,9 @@ const loadTimetableDataAuthenticated = async (
 		config.base_url,
 	);
 
-	const date = new Date();
-	date.setMonth(3, 28);
-
 	return untis
 		.login()
-		.then(() => untis.getOwnClassTimetableFor(date))
+		.then(() => untis.getOwnClassTimetableForToday())
 		.then(lessons => {
 			const { filteredLessons, cancelledLessons } =
 				filterAndSortLessons(lessons);
