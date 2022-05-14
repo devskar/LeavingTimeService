@@ -40,9 +40,12 @@ const loadTimetableDataAuthenticated = async (
 		config.base_url,
 	);
 
+	const d = new Date();
+	d.setDate(18);
+
 	return untis
 		.login()
-		.then(() => untis.getOwnClassTimetableForToday())
+		.then(() => untis.getOwnClassTimetableFor(d))
 		.then(lessons => {
 			const { filteredLessons, cancelledLessons } =
 				filterAndSortLessons(lessons);
@@ -50,7 +53,7 @@ const loadTimetableDataAuthenticated = async (
 			if (filteredLessons.length === 0) {
 				return { cancelledLessons };
 			}
-			const schoolStart = untisTimeToDate(filteredLessons[0].startTime);
+			const schoolStart = untisTimeToDate(filteredLessons[0].startTime, d);
 			return { cancelledLessons, schoolStart };
 		});
 };

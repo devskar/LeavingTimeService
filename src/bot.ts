@@ -4,10 +4,15 @@ import {
 	ClientEvents,
 	Intents,
 	Message,
+	MessageEmbed,
 	TextChannel,
 	User,
 } from 'discord.js';
+import { Journey } from 'hafas-client';
+import { Lesson } from 'webuntis';
 import config from '../ltime.config.json';
+import JourneyMessageEmbed from './embeds/JourneyMessageEmbed';
+import { formatLessons } from './formatter';
 
 class Bot {
 	private client: Client;
@@ -43,6 +48,33 @@ class Bot {
 		this.client.destroy();
 	}
 
+	async sendJourneyMessage(userId: string, journeys: readonly Journey[]) {
+		if (journeys.length < 1) return;
+
+		const user = await this.getUserById(userId);
+		const embeds: MessageEmbed[] = journeys.map(
+			j => new JourneyMessageEmbed(j),
+		);
+
+		await user.send({
+			embeds,
+		});
+	}
+
+	async sendCancelledLessonsMessage(userId: string, lessons: Lesson[]) {
+		if (lessons.length < 1) return;
+
+		const user = await this.getUserById(userId);
+
+		const embed: MessageEmbed = new MessageEmbed({
+			title: 'You have cancelled classes today!',
+			description: formatLessons(lessons),
+			color: 'RED',
+		});
+
+		await user.send({ embeds: [embed] });
+	}
+
 	async log(message: string): Promise<Message<boolean> | void> {
 		console.log('[LOG] ' + message);
 		if (this.client.isReady())
@@ -64,9 +96,7 @@ class Bot {
 		user: User,
 		message: string,
 	): Promise<Message<boolean>> {
-		// DEBUG
-		this.log('Sending message to ' + user.username);
-		return user.send(message);
+		return await user.send(message);
 	}
 
 	async sendMessageToUserById(
