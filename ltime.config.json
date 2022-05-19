@@ -1,0 +1,7 @@
+{
+	"discord": {
+		"appToken": "token",
+		"logChannelId": "123456",
+		"botStatus": "Running configurations..."
+	}
+}
