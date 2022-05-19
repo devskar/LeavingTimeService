@@ -1,0 +1,17 @@
+{
+	"untis": {
+		"anonymous": false,
+		"school_name": "example school",
+		"username": "name_name",
+		"password": "base64pw",
+		"base_url": "mese.webuntis.com"
+	},
+	"discord": {
+		"user_id": "1"
+	},
+	"trip": {
+		"time_buffer_min": 3,
+		"start_location": "Alexanderplatz",
+		"end_location": "Hackescher Markt"
+	}
+}
